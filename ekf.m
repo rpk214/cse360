@@ -1,13 +1,12 @@
-function [x,P] = ekf(v,omega,robot,lidar,x,P)
+function [x,P] = ekf(v,omega,lidar,x,P)
 
 % You should only add code where you see
 % *** ADD NECESSARY CODE HERE ***
 % You should NOT change any parameters/values that have already been set. 
 
-% Close any/all open figures, and open a new one associated with kbhit()
-close all;
-
-dt = 0.2;
+global kbhit;
+global dt;
+global robot;
 
 Q = [   .01^2   0           ;
         0       (pi/60)^2   ];
@@ -34,9 +33,6 @@ K = P*H'/(H*P*H' + eye(2)*R*eye(2)');
 
 x = x + K*([rho; alpha] - [sqrt((x(1)-lidar(1))^2 + (x(2)-lidar(2))^2); atan2(x(2) - lidar(2),(x(1)-lidar(1))) - lidar(3)]);
 P = (eye(3) - K*H)*P;
-
-% We need this to flush the I/O so it plots nicely
-pause(0.01);
 
 function [rho, alpha] = scan_lidar( lidar, robot, R )
 pose = robot.getpose();

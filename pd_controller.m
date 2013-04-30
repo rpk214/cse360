@@ -1,28 +1,18 @@
-function pd_controller(points)
+function pd_controller(start,points,lidar)
 %PD_CONTROLLER Summary of this function goes here
 %   Detailed explanation goes here
 
-close all;
-
-robot = iRobotCreate(5);
-
-robot.setworkspace([-2 2 -2.5 2.5]);
+global robot;
 
 orientation = rand(1) * (2 * pi/3) - (pi/3);
-robot.moveroomba([-1.25 -1 orientation]);
-
-axis equal;
-plot([-1.25 1.25], [1 1], 'linewidth', 2);
-plot([-1.25 1.25], [-1 -1], 'linewidth', 2);
-plot([0 0], [-2.25 2.25], 'linewidth', 2);
-plot([-1.25 1.25], [-1 1], 'linewidth', 2);
+robot.moveroomba([start orientation]);
 
 pose = robot.getpose();
 v0 = .5;
 phi_max = .5;
 kd = 2.4495;
 kp = 1.5;
-current_point = [-1.25 -1];
+current_point = start;
 
 dimensions = size(points);
 
