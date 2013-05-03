@@ -6,9 +6,13 @@ points = [  -1.25   -1      ;
             1.25    1       ;
             1.25    -1      ;
             0       -2.25   ;
-            0       0       ];
+            0       0       ;
+            0       1       ;
+            0       -1      ];
+A = 8;
+B = 9;
 
-order = [1 5 4 5 1 2];
+order = [1 2 A 3 6 A 4 5 B 7]; % Order is 1 3 6 4 5 7
 start = points(order(1),:);
 route = [];
 for i = 2:length(order)
