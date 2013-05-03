@@ -4,10 +4,12 @@ function pd_controller(start,points,lidar)
 
 global robot;
 
+P = [0.01 0 0; 0 0.01 0; 0 0 pi/4^2];
+
 orientation = rand(1) * (2 * pi/3) - (pi/3);
 robot.moveroomba([start orientation]);
 
-pose = robot.getpose();
+x = [start orientation]';
 v0 = .5;
 phi_max = .5;
 kd = 2.4495;
@@ -26,7 +28,8 @@ for i = 1:dimensions(1)
     % circle.
     type = type_of_path(current_point, points(i, :));
     % Make sure robot is facing correct direction.
-    rotate(robot, current_point, points(i, :), type);
+    rotate(robot, current_point, points(i, :), type, x);
+    x = robot.getpose()';
     % Assign booleans based on type of path.
     if (strcmp(type ,'vertical'))
         vert = true;
@@ -38,11 +41,13 @@ for i = 1:dimensions(1)
         circle = true;
     end
     while ~done
+        if exist('h','var'), delete(h); end
+            h = plot_cov( 100*P(1:2,1:2), x(1), x(2), 'linestyle', 'g', 'linewidth', 2 );
         % Determine which PD form to use based on type of path.
         if horz
-            w = y_axis(points(i,2), pose, kd, kp);
+            w = y_axis(points(i,2), x, kd, kp);
         elseif vert
-            w = x_axis(points(i,1), pose, kd, kp);
+            w = x_axis(points(i,1), x, kd, kp);
         end
                 
         % Move robot.
@@ -57,11 +62,11 @@ for i = 1:dimensions(1)
         
         v_robot = (v_left_scaled + v_right_scaled)/2;
         robot.setvel(v_robot, w_scaled);
-        pose = robot.getpose();
-        x_error = abs(points(i,1) - pose(1));
-        y_error = abs(points(i,2) - pose(2));
+        [x,P] = ekf(v_robot,w_scaled,lidar,x,P);
+        x_error = abs(points(i,1) - x(1));
+        y_error = abs(points(i,2) - x(2));
         % Check if close to end point.
-        if (x_error < .05 && y_error < .05)
+        if((horz && x_error < .05 && y_error < .25) || (vert && x_error < .25 && y_error < .05))
             done = true;
         end
     end
@@ -89,8 +94,7 @@ else
     type = 'circle';
 end
 
-function rotate(robot, current, goto, type)
-pose = robot.getpose();
+function rotate(robot, current, goto, type, pose)
 if (strcmp(type, 'horizontal'))
     if (current(1) - goto(1) < 0)
         robot.rotate(-pose(3));
