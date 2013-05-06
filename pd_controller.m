@@ -6,7 +6,7 @@ global robot;
 
 P = [0.01 0 0; 0 0.01 0; 0 0 pi/4^2];
 
-orientation = rand(1) * (2 * pi/3) - (pi/3);
+orientation = pi/2;
 robot.moveroomba([start orientation]);
 
 x = [start orientation]';
@@ -28,8 +28,7 @@ for i = 1:dimensions(1)
     % circle.
     type = type_of_path(current_point, points(i, :));
     % Make sure robot is facing correct direction.
-    rotate(robot, current_point, points(i, :), type, x);
-    x = robot.getpose()';
+    x = rotate(robot, current_point, points(i, :), type, x);
     % Assign booleans based on type of path.
     if (strcmp(type ,'vertical'))
         vert = true;
@@ -94,20 +93,32 @@ else
     type = 'circle';
 end
 
-function rotate(robot, current, goto, type, pose)
+function pose = rotate(robot, current, goto, type, pose)
 if (strcmp(type, 'horizontal'))
     if (current(1) - goto(1) < 0)
-        robot.rotate(-pose(3));
+        angle = -pose(3);
     else
-        robot.rotate(pi - pose(3));
+        angle = pi - pose(3);
     end
 elseif(strcmp(type, 'vertical'))
     if (current(2) - goto(2) < 0)
-        robot.rotate(pi/2 - pose(3));
+        angle = pi/2 - pose(3);
     else
-        robot.rotate(-pi/2 - pose(3));
+        angle = -pi/2 - pose(3);
     end
 end
+
+% shift the angle into -pi to pi
+while pi < angle
+    angle = angle - 2 * pi;
+end
+
+while angle < -pi
+    angle = angle + 2 * pi;
+end
+
+pose(3) = pose(3) + angle;
+robot.rotate(angle);
 
 function w = y_axis(yd, pose, kd, kp)
 

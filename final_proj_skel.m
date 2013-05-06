@@ -40,9 +40,8 @@ kbhit = false;
 % end
 
 lidar = lidar_config();
-
 execute_path(lidar);
-find_ball();
+%find_ball(robot);
 
 % Clean up
 SICK_LCM_Shutdown();

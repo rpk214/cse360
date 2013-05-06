@@ -26,7 +26,8 @@ P = A*P*A' + W*Q*W';
 
 % Measurement Update
 [rho, alpha] = scan_lidar( lidar, robot, R );
-% [rho, alpha] = scan_real_lidar();
+%[rho, alpha] = scan_real_lidar();
+%plot(rho*cos(alpha + lidar(3)) + lidar(1), rho*sin(alpha + lidar(3)) + lidar(2),'*')
 H = [   (x(1) - lidar(1))/(sqrt((x(1)-lidar(1))^2 + (x(2)-lidar(2))^2))         (x(2) - lidar(2))/(sqrt((x(1)-lidar(1))^2 + (x(2)-lidar(2))^2))     0   ;
         (-(x(2)-lidar(2))/((x(1)-lidar(1))^2 + (x(2)-lidar(2))^2))              ((x(1)-lidar(1))/((x(1)-lidar(1))^2 + (x(2)-lidar(2))^2))           0   ];
 K = P*H'/(H*P*H' + eye(2)*R*eye(2)');
@@ -39,13 +40,14 @@ pose = robot.getpose();
 rho = sqrt(((lidar(1)-pose(1))^2 + ((lidar(2)-pose(2))^2))) + R(1,1)^.5 * randn;
 alpha = atan2(pose(2) - lidar(2),(pose(1)-lidar(1))) - lidar(3) + R(2,2)^.5 * randn;
 
-function [rho, alpha] = scan_real_lidar()
+function [range_mean, alpha_mean] = scan_real_lidar()
 range = zeros(181,1);
 reflect = zeros(181,1);
 alpha = [-45:0.5:45]';
 [range, reflect] = SICK_LCM_GetScan();
 valid = (reflect > 200);
-alpha_valid = alpha(valid);
-range_valid = range(valid);
-alpha = sum(alpha_valid) / length(alpha_valid);
-rho = sum(range_valid) / length(range_valid);
+alpha_valid = alpha .* valid;
+range_valid = range .* valid;
+alpha_valid(alpha_valid == 0) = [];
+alpha_mean = deg2rad(sum(alpha_valid) / length(alpha_valid));
+range_mean = sum(range_valid) / length(alpha_valid);
