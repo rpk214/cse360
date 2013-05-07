@@ -124,12 +124,12 @@ end
 new_angle = pose(3) + angle;
 
 if angle < 0
-    while pose(3) >= new_angle
+    while pose(3) >= new_angle + 0.2618
         robot.setvel(0,-pi/8);
         [pose,P] = ekf(0,-pi/8,lidar,pose,P);
     end
 else
-    while pose(3) <= new_angle
+    while pose(3) <= new_angle - 0.2618
         robot.setvel(0,pi/8);
         [pose,P] = ekf(0,pi/8,lidar,pose,P);
     end
