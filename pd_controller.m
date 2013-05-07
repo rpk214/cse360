@@ -4,16 +4,16 @@ function pd_controller(start,points,lidar)
 
 global robot;
 
-P = [0.01 0 0; 0 0.01 0; 0 0 pi/4^2];
+P = [0.03 0 0; 0 0.03 0; 0 0 pi/12^2];
 
 orientation = pi/2;
-robot.moveroomba([start orientation]);
+%robot.moveroomba([start orientation]);                                                  % Simulation
 
 x = [start orientation]';
-v0 = .5;
-phi_max = .5;
-kd = 2.4495;
-kp = 1.5;
+v0 = .4;
+phi_max = .4;
+kp = 2;
+kd = 2*sqrt(kp);
 current_point = start;
 
 dimensions = size(points);
@@ -28,7 +28,12 @@ for i = 1:dimensions(1)
     % circle.
     type = type_of_path(current_point, points(i, :));
     % Make sure robot is facing correct direction.
-    x = rotate(robot, current_point, points(i, :), type, x);
+    fprintf('Rotating at point (%.2f %.2f)\n',current_point(1),current_point(2));
+    fprintf('Rotating to point (%.2f %.2f)\n',points(i,1),points(i,2));
+    fprintf('Current orientation is %.4f degrees\n',rad2deg(x(3)));
+    fprintf('Current position estimate is (%.2f %.2f)\n',x(1),x(2));
+    [x,P] = rotate(robot, current_point, points(i, :), type, x, P, lidar);
+    fprintf('New value of the orientation is %.2f degrees\n\n',rad2deg(x(3)));
     % Assign booleans based on type of path.
     if (strcmp(type ,'vertical'))
         vert = true;
@@ -40,8 +45,8 @@ for i = 1:dimensions(1)
         circle = true;
     end
     while ~done
-        if exist('h','var'), delete(h); end
-            h = plot_cov( 100*P(1:2,1:2), x(1), x(2), 'linestyle', 'g', 'linewidth', 2 );
+        %if exist('h','var'), delete(h); end
+        %h = plot_cov( 100*P(1:2,1:2), x(1), x(2), 'linestyle', 'g', 'linewidth', 2 );
         % Determine which PD form to use based on type of path.
         if horz
             w = y_axis(points(i,2), x, kd, kp);
@@ -75,8 +80,6 @@ for i = 1:dimensions(1)
 end
 
 robot.setvel(0,0);
-disp('Hit any key to continue...');
-pause;
 
 function type = type_of_path(current, goto)
 p1 = [-1.25, -1];
@@ -93,7 +96,8 @@ else
     type = 'circle';
 end
 
-function pose = rotate(robot, current, goto, type, pose)
+function [pose,P] = rotate(robot, current, goto, type, pose, P, lidar)
+disp('Rotating Now')
 if (strcmp(type, 'horizontal'))
     if (current(1) - goto(1) < 0)
         angle = -pose(3);
@@ -117,8 +121,19 @@ while angle < -pi
     angle = angle + 2 * pi;
 end
 
-pose(3) = pose(3) + angle;
-robot.rotate(angle);
+new_angle = pose(3) + angle;
+
+if angle < 0
+    while pose(3) >= new_angle
+        robot.setvel(0,-pi/8);
+        [pose,P] = ekf(0,-pi/8,lidar,pose,P);
+    end
+else
+    while pose(3) <= new_angle
+        robot.setvel(0,pi/8);
+        [pose,P] = ekf(0,pi/8,lidar,pose,P);
+    end
+end
 
 function w = y_axis(yd, pose, kd, kp)
 

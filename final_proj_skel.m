@@ -1,4 +1,4 @@
-function final_proj_skel(video)
+function final_proj_skel()
 %=============================================================================
 % function final_proj_skel(video)
 % - Streams LIDAR video data
@@ -20,28 +20,19 @@ close all;
 global dt;
 global robot;
 dt = .2;
-robot = iRobotCreate(1/dt);
+robot = iRobotCreate(1/dt,8);                                                                   % Simulation
 
-robot.setworkspace([-2 2 -2.5 2.5]);
-makeMap();
+%robot.setworkspace([-2 2 -2.5 2.5]);                                                            % Simulation
+%makeMap();                                                                                      % Simulation
 
 % This implements the functionality of C's kbhit in Matlab.
 % Note you need the associated my_kbhit.m file for this to work.
 global kbhit;
 kbhit = false;
 
-% Start the camera
-% try
-%     start(video);
-% catch
-%     disp('Could not start video');
-%     SICK_LCM_Shutdown();
-%     return;
-% end
-
 lidar = lidar_config();
 execute_path(lidar);
-%find_ball(robot);
+find_ball(robot);
 
 % Clean up
 SICK_LCM_Shutdown();

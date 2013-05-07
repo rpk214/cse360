@@ -1,6 +1,6 @@
-function  find_ball()%robot )
+function  find_ball(robot)
 % % create robot object iRobotCreate(sim, COM, update)
-robot = iRobotCreate(0,6,5);
+%robot = iRobotCreate(5,7);
 
 % the color model to be programmed base on the model created using the 
 % calibrate image function on competition day
