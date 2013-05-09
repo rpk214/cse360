@@ -13,14 +13,14 @@ function final_proj_skel()
 
 % Set the scan rate of the SICK Client to 30 Hz
 % Leave this up top as it will clear other variables when it's called
-%SICK_LCM_Init( 30 );
+SICK_LCM_Init( 30 );
 
 close all;
 
 global dt;
 global robot;
 dt = .2;
-robot = iRobotCreate(1/dt,3);                                                                   % Simulation
+robot = iRobotCreate(1/dt,8);                                                                   % Simulation
 
 %robot.setworkspace([-2 2 -2.5 2.5]);                                                            % Simulation
 %makeMap();                                                                                      % Simulation
@@ -30,8 +30,8 @@ robot = iRobotCreate(1/dt,3);                                                   
 global kbhit;
 kbhit = false;
 
-%lidar = lidar_config();
-%execute_path(lidar);
+lidar = lidar_config();
+execute_path(lidar);
 find_ball(robot);
 
 % Clean up

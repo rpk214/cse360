@@ -1,2 +1,2 @@
 function lidar = lidar_config()
-lidar = [-18.6519e-2;-328.4709e-2;1.5550];
+lidar = [-22.9034e-2;-327.5335e-2;1.5550];

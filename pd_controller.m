@@ -6,7 +6,7 @@ global robot;
 
 P = [0.03 0 0; 0 0.03 0; 0 0 pi/12^2];
 
-orientation = pi/2;
+orientation = 0;
 %robot.moveroomba([start orientation]);                                                  % Simulation
 
 x = [start orientation]';
@@ -128,21 +128,23 @@ if angle < 0
         robot.setvel(0,-pi/8);
         [pose,P] = ekf(0,-pi/8,lidar,pose,P);
     end
+    pose(3) = pose(3) - 0.2618;
 else
     while pose(3) <= new_angle - 0.2618
         robot.setvel(0,pi/8);
         [pose,P] = ekf(0,pi/8,lidar,pose,P);
     end
+    pose(3) = pose(3) + 0.2618;
 end
 
 function w = y_axis(yd, pose, kd, kp)
 
 e = yd - pose(2);
-w = -kd * tan(pose(3)) + (kp * e)/(.5*cos(pose(3)));
+w = -kd * tan(pose(3)) + (kp * e)/(.4*cos(pose(3)));
 
 function w = x_axis(xd, pose, kd, kp)
 
 e = xd - pose(1);
-w = kd * cot(pose(3)) - (kp * e)/(.5*sin(pose(3)));
+w = kd * cot(pose(3)) - (kp * e)/(.4*sin(pose(3)));
 
 
